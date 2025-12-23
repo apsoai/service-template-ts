@@ -5,6 +5,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export async function configureNestApp(app: INestApplication): Promise<void> {
+  // Enable CORS for all origins - API Gateway handles authorization
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Accept', 'Origin', 'X-Requested-With'],
+    credentials: false,
+  });
+
   // Configure global filters
   app.useGlobalFilters(new TypeORMErrorFilter());
 
