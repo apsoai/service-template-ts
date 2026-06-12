@@ -53,7 +53,7 @@
     "@apso/crud-core": "file:../apso-crud-core",
     "@apso/crud-request": "file:../apso-crud-request",
     "@apso/crud-typeorm": "file:../apso-crud-typeorm",
-    "@types/aws-lambda": "^8.10.147",
+    "@types/aws-lambda": "^8.10.162",
     "@vendia/serverless-express": "^4.12.6",
     "aws-lambda": "^1.0.7",
     "class-transformer": "^0.5.1",
