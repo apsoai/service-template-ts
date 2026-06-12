@@ -1,8 +1,8 @@
 {
-  "name": "@apso/template-v2",
+  "name": "@apso/service-template-ts",
   "private": true,
   "version": "1.0.0",
-  "description": "Nest TypeScript starter repository (v2 - uses @apso/crud)",
+  "description": "Apso TypeScript/NestJS service template",
   "license": "Apache-2.0",
   "scripts": {
     "build": "nest build",

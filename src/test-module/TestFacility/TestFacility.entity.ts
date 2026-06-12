@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { IsOptional, IsNotEmpty } from 'class-validator';
-import { CrudValidationGroups } from '@nestjsx/crud';
+import { CrudValidationGroups } from '@apso/crud';
 import * as enums from '../enums';
 import { TestCustomer } from '../TestCustomer/TestCustomer.entity';
 

@@ -1,17 +1,22 @@
 import { Controller } from '@nestjs/common';
-import {
-  Crud,
-  CrudController,
-  Override,
-  ParsedRequest,
-  CrudRequest,
-  ParsedBody,
-  CreateManyDto,
-} from '@nestjsx/crud';
-import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
+import { Crud, CrudController } from '@apso/crud';
+import { ApiTags } from '@nestjs/swagger';
 import { TestFacility, TestFacilityCreate } from './dtos/TestFacility.dto';
 import { TestFacilityService } from './TestFacility.service';
 
+/**
+ * TestFacility Controller (v2 - using @apso/crud)
+ *
+ * This is the new simplified CRUD controller that extends CrudController
+ * instead of implementing it with manual overrides.
+ *
+ * Key differences from v1 (@nestjsx/crud):
+ * - Extends CrudController<T> instead of implements
+ * - No need for @Override decorators
+ * - No need for base getter
+ * - API documentation is auto-generated
+ * - Hooks available via protected methods (beforeGetMany, afterCreateOne, etc.)
+ */
 @Crud({
   model: {
     type: TestFacility,
@@ -22,10 +27,7 @@ import { TestFacilityService } from './TestFacility.service';
     replace: TestFacility,
   },
   query: {
-    /**
-     * commenting out limit and pagination because of an issue with Crud lib: https://github.com/nestjsx/crud/issues/777
-     */
-    // TODO: make limit env driven?
+    // Issue #777 is fixed in @apso/crud - no workaround needed
     limit: 5,
     alwaysPaginate: true,
     join: {
@@ -36,60 +38,18 @@ import { TestFacilityService } from './TestFacility.service';
 })
 @Controller('TestFacilitys')
 @ApiTags('Test Facilitys')
-export class TestFacilityController implements CrudController<TestFacility> {
-  constructor(public service: TestFacilityService) {}
-
-  get base(): CrudController<TestFacility> {
-    return this;
+export class TestFacilityController extends CrudController<TestFacility> {
+  constructor(public service: TestFacilityService) {
+    super();
   }
 
-  @Override('getManyBase')
-  @ApiOperation({ summary: 'Retrieve multiple Facilitys' })
-  getMany(@ParsedRequest() req: CrudRequest) {
-    return this.base.getManyBase(req);
-  }
+  // Optional: Add hooks for custom logic
+  // protected async beforeGetMany(req: ParsedRequest): Promise<void> {
+  //   // Custom logic before fetching many entities
+  // }
 
-  @Override('getOneBase')
-  @ApiOperation({ summary: 'Retrieve a single Facility' })
-  get(@ParsedRequest() req: CrudRequest) {
-    return this.base.getOneBase(req);
-  }
-
-  @Override('createOneBase')
-  @ApiOperation({ summary: 'Create a single Facility' })
-  @ApiBody({
-    type: TestFacilityCreate,
-    description:
-      'The Description for the Post Body. Please look into the DTO. You will see the @ApiOptionalProperty used to define the Schema.',
-  })
-  create(@ParsedRequest() req: CrudRequest, @ParsedBody() dto: TestFacility) {
-    return this.base.createOneBase(req, dto);
-  }
-
-  @Override('createManyBase')
-  @ApiOperation({ summary: 'Create multipleFacilitys' })
-  createMany(
-    @ParsedRequest() req: CrudRequest,
-    @ParsedBody() dto: CreateManyDto<TestFacility>,
-  ) {
-    return this.base.createManyBase(req, dto);
-  }
-
-  @Override('updateOneBase')
-  @ApiOperation({ summary: 'Update a single Facility' })
-  update(@ParsedRequest() req: CrudRequest, @ParsedBody() dto: TestFacility) {
-    return this.base.updateOneBase(req, dto);
-  }
-
-  @Override('replaceOneBase')
-  @ApiOperation({ summary: 'Replace a single Facility' })
-  replace(@ParsedRequest() req: CrudRequest, @ParsedBody() dto: TestFacility) {
-    return this.base.replaceOneBase(req, dto);
-  }
-
-  @Override('deleteOneBase')
-  @ApiOperation({ summary: 'Delete a single Facility' })
-  delete(@ParsedRequest() req: CrudRequest) {
-    return this.base.deleteOneBase(req);
-  }
+  // protected async afterCreateOne(req: ParsedRequest, result: CreateOneResponse<TestFacility>): Promise<CreateOneResponse<TestFacility>> {
+  //   // Custom logic after creating an entity
+  //   return result;
+  // }
 }

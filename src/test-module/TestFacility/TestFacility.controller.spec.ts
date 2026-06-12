@@ -2,9 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TestFacility } from './dtos/TestFacility.dto';
 import { TestFacilityController } from './TestFacility.controller';
 import { TestFacilityService } from './TestFacility.service';
-import { CrudRequest } from '@nestjsx/crud';
+import { ParsedRequest } from '@apso/crud';
 
-const baseRequest: CrudRequest = {
+const baseRequest: ParsedRequest = {
+  query: {},
+  options: {},
   parsed: {
     fields: [],
     paramsFilter: [],
@@ -17,9 +19,8 @@ const baseRequest: CrudRequest = {
     limit: 10,
     offset: 0,
     page: 1,
-    cache: undefined,
+    cache: 0,
   },
-  options: {},
 };
 
 describe('TestFacilityController', () => {
@@ -30,8 +31,9 @@ describe('TestFacilityController', () => {
     const ApiServiceProvider = {
       provide: TestFacilityService,
       useFactory: () => ({
-        createOne: jest.fn(() => []),
-        getOne: jest.fn(() => {}),
+        createOne: jest.fn(() => ({ data: {} })),
+        getOne: jest.fn(() => ({ data: {} })),
+        getMany: jest.fn(() => ({ data: [], count: 0, total: 0, page: 1, pageCount: 0 })),
       }),
     };
     const module: TestingModule = await Test.createTestingModule({
@@ -47,18 +49,17 @@ describe('TestFacilityController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should call FacilityController get method', () => {
-    const req: CrudRequest = { ...baseRequest };
-    expect(controller.get(req)).not.toEqual(null);
+  it('should call FacilityController getOne method', async () => {
+    // Note: In the new API, methods receive the raw request and extract ParsedRequest internally
+    const mockReq = { parsedRequest: baseRequest };
+    expect(await controller.getOne(mockReq)).not.toEqual(null);
     expect(spyService.getOne).toHaveBeenCalled();
   });
 
-  it('should call FacilityController create method', () => {
-    const req: CrudRequest = { ...baseRequest };
-
+  it('should call FacilityController createOne method', async () => {
+    const mockReq = { parsedRequest: baseRequest };
     const dto = new TestFacility();
-    controller.create(req, dto);
-    expect(controller.create(req, dto)).not.toEqual(null);
+    expect(await controller.createOne(mockReq, dto)).not.toEqual(null);
     expect(spyService.createOne).toHaveBeenCalled();
   });
 

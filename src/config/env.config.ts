@@ -36,10 +36,10 @@ const defaultConfig: EnvConfigOptions = {
   APP_PORT: 3200,
   APP_SITE: 'http://localhost',
   APP_NAME: 'Apso Template',
-  ALLOWED_ORIGINS: 'locahost',
+  ALLOWED_ORIGINS: 'localhost',
   COOKIE_HTTP_ONLY: true,
   COOKIE_PATH: '/auth/refresh_token',
-  COOKIE_DOMAIN: 'http://localhost:3001',
+  COOKIE_DOMAIN: 'localhost',
   COOKIE_SAME_SITE: false,
   COOKIE_SECURE: false,
   LOG_LEVEL: 'debug',
@@ -61,8 +61,11 @@ const defaultConfig: EnvConfigOptions = {
   STRIPE_CHECKOUT_SUCCESS_URL: '',
 };
 
+// Merge order: defaults < .env file < process.env (explicit env vars win).
+// This matches dotenv's own convention (dotenv does not overwrite existing process.env keys)
+// and allows WebContainer spawn({ env }) to override .env file values.
 export const config: EnvConfigOptions = {
   ...defaultConfig,
-  ...process.env,
   ...env.config().parsed,
-};
+  ...process.env,
+} as unknown as EnvConfigOptions;

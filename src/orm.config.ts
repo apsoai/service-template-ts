@@ -8,17 +8,25 @@ import { join } from 'path';
 import AppConfig from './config';
 import { usePGlite, useNoDatabase } from './config/database.config';
 
-// Conditionally import PGliteDriver only when needed
+// Conditionally import PGliteDriver only when needed.
+// Fail-fast if DATABASE_TYPE=pglite but the driver can't load -- never silently
+// fall back to a postgres connection that will ECONNREFUSED in WebContainer.
 let PGliteDriver: any;
 if (usePGlite) {
   try {
     PGliteDriver = require('typeorm-pglite').PGliteDriver;
   } catch (e) {
-    console.error('Failed to load typeorm-pglite. Make sure it is installed:', e);
+    throw new Error(
+      'DATABASE_TYPE is set to "pglite" but typeorm-pglite failed to load. ' +
+      'Make sure typeorm-pglite and @electric-sql/pglite are installed.\n' +
+      `Original error: ${e instanceof Error ? e.message : e}`
+    );
   }
 }
 
-const sslConfig = process.env.DB_SSL
+// Support both DB_SSL and DATABASE_SSL env vars (Lambda uses DATABASE_SSL)
+const sslEnabled = process.env.DB_SSL === 'true' || process.env.DATABASE_SSL === 'true';
+const sslConfig = sslEnabled
   ? {
       ssl: true,
       extra: {
@@ -35,8 +43,11 @@ const ormConfig = useNoDatabase
   : {
       type: AppConfig.database?.type as any,
       // PGlite uses driver injection instead of connection details
+      // PGLITE_DATA_DIR enables file-based persistence (needed for multi-step CLI workflows
+      // like schema:sync followed by migration:generate). Without it, PGlite is in-memory
+      // and data is lost when the process exits.
       ...(usePGlite && PGliteDriver
-        ? { driver: new PGliteDriver().driver }
+        ? { driver: new PGliteDriver(process.env.PGLITE_DATA_DIR || undefined).driver }
         : {
             host: AppConfig.database?.host,
             port: parseInt(AppConfig.database?.port || '5432', 10),
