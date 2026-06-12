@@ -68,7 +68,7 @@
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20",
     "typeorm-extension": "^3.5.1",
-    "@electric-sql/pglite": "^0.3.14",
+    "@electric-sql/pglite": "^0.5.2",
     "typeorm-pglite": "^0.3.2"
   },
   "devDependencies": {
