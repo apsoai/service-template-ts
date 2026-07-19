@@ -1,5 +1,7 @@
 {
-    "version": 1,
+    "version": 2,
+    "language": "typescript",
     "rootFolder": "src",
-    "entities": []
+    "entities": [],
+    "relationships": []
 }
