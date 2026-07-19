@@ -9,9 +9,6 @@ rootDir=$(dirname "${currentDir}")
 info "Composing your Apso environment"
 info "[See ReadMe for information on how to customize this process]"
 
-if ! [ -x "$(command -v docker-compose)" ]; then
-  error 'Error: Docker Compose is not installed.'
-  exit 1
-fi
+requireCompose
 
-run COMPOSE_FILE="${currentDir}/compose/docker-compose.yml" docker-compose down
+run COMPOSE_FILE="${currentDir}/compose/docker-compose.yml" ${COMPOSE_CMD} down

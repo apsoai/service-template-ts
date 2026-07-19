@@ -12,16 +12,12 @@ source "${rootDir}/.env" set
 info "Composing your Apso environment"
 info "[See ReadMe for information on how to customize this process]"
 
-if ! [ -x "$(command -v docker-compose)" ]; then
-  error 'Error: Docker Compose is not installed.'
-  exit 1
-fi
+requireCompose
 
 info "DATABASE_PORT=${DATABASE_PORT}:5432"
 run COMPOSE_FILE="${currentDir}/compose/docker-compose.yml" DATABASE_PORT="${DATABASE_PORT}:5432" \
-    docker-compose \
+    ${COMPOSE_CMD} \
     up \
     --detach \
     --remove-orphans \
-    --build  
-# docker-compose --file "./scripts/compose/docker-compose.yml" up --remove-orphans --build 
+    --build

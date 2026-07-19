@@ -88,3 +88,23 @@ showElapsed() {
     local elapsed=$((${endTime} - ${startTime}))
     debug "Finished in ${bold}${elapsed}${reset} seconds"
 }
+
+# Resolve the Docker Compose command. Prefers the "docker compose" v2
+# plugin; falls back to the standalone docker-compose binary. Prints the
+# command, or prints nothing when neither is available.
+composeCmd() {
+    if docker compose version > /dev/null 2>&1; then
+        echo "docker compose"
+    elif command -v docker-compose > /dev/null 2>&1; then
+        echo "docker-compose"
+    fi
+}
+
+# Set COMPOSE_CMD or exit with an actionable error.
+requireCompose() {
+    COMPOSE_CMD=$(composeCmd)
+    if [ -z "${COMPOSE_CMD}" ]; then
+        error 'Error: Docker Compose is not installed. Install Docker Desktop, the docker compose plugin, or the standalone docker-compose binary.'
+        exit 1
+    fi
+}
