@@ -48,7 +48,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.1.0",
     "@nestjs/typeorm": "^10.0.0",
-    "@nestjs/websockets": "^10.0.0",
+    "@nestjs/websockets": "^10.4.22",
     "@apso/crud": "file:../apso-crud",
     "@apso/crud-core": "file:../apso-crud-core",
     "@apso/crud-request": "file:../apso-crud-request",
