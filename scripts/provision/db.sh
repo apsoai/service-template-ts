@@ -71,11 +71,38 @@ createDatabaseSchema() {
     local USER=$1
     local DATABASE=$2
     local SCHEMA=$3
-    
-    schemaDatabaseCall $DATABASE "revoke usage on schema public from public;" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
-    schemaDatabaseCall $DATABASE "drop schema public;" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+
     schemaDatabaseCall $DATABASE "alter database ${DATABASE} owner to ${USER};" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
-    schemaDatabaseCall $DATABASE "create schema ${SCHEMA};" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
-    schemaDatabaseCall $DATABASE "GRANT ALL ON SCHEMA ${SCHEMA} TO ${USER}" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
-    schemaDatabaseCall $DATABASE "alter role ${USER} SET search_path=${SCHEMA};" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+
+    # When the app schema is "public", keep/restore it. Dropping public here
+    # (and again from test-schema) was leaving only public_test and breaking
+    # TypeORM synchronize with: schema "public" does not exist.
+    if [ "${SCHEMA}" = "public" ]; then
+        schemaDatabaseCall $DATABASE "create schema if not exists public;" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+        schemaDatabaseCall $DATABASE "grant all on schema public to ${USER};" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+        schemaDatabaseCall $DATABASE "grant all on schema public to public;" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+    else
+        schemaDatabaseCall $DATABASE "revoke usage on schema public from public;" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+        schemaDatabaseCall $DATABASE "drop schema if exists public cascade;" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+        schemaDatabaseCall $DATABASE "create schema if not exists ${SCHEMA};" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+        schemaDatabaseCall $DATABASE "grant all on schema ${SCHEMA} to ${USER};" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+    fi
+
+    # Ensure uuid-ossp lives in the app schema. CREATE EXTENSION IF NOT EXISTS
+    # is a no-op when the extension already exists in another schema (e.g.
+    # public_test), which leaves TypeORM's uuid_generate_v4() default broken.
+    schemaDatabaseCall $DATABASE "drop extension if exists \"uuid-ossp\" cascade;" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+    schemaDatabaseCall $DATABASE "create extension \"uuid-ossp\" with schema ${SCHEMA};" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+
+    schemaDatabaseCall $DATABASE "alter role ${USER} set search_path=${SCHEMA};" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+}
+
+# Create a secondary schema (e.g. public_test) without destroying the primary one.
+createAdditionalSchema() {
+    local USER=$1
+    local DATABASE=$2
+    local SCHEMA=$3
+
+    schemaDatabaseCall $DATABASE "create schema if not exists ${SCHEMA};" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+    schemaDatabaseCall $DATABASE "grant all on schema ${SCHEMA} to ${USER};" $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
 }

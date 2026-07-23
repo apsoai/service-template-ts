@@ -28,6 +28,7 @@ ROOT_DATABASE="postgres"
 
 info "SET DATABASE ${DATABASE}"
 
-# resetDatabase $DATABASE
+# Do not reuse createDatabaseSchema here — that path can drop `public` and
+# wipe the primary schema when DATABASE_SCHEMA=public.
 createDatabaseUser $USER $PASSWORD $DATABASE $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
-createDatabaseSchema $USER $DATABASE $SCHEMA $HOSTNAME $PORT $ROOT_USERNAME $ROOT_PASSWORD $ROOT_DATABASE
+createAdditionalSchema $USER $DATABASE $SCHEMA
