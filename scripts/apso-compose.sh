@@ -6,8 +6,8 @@ rootDir=$(dirname "${currentDir}")
 . "${currentDir}/common.sh"
 
 set -o allexport
-source "${rootDir}/.env" set
-+o allexport
+source "${rootDir}/.env"
+set +o allexport
 
 info "Composing your Apso environment"
 info "[See ReadMe for information on how to customize this process]"
