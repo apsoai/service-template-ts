@@ -14,6 +14,7 @@ import { usePGlite, useNoDatabase } from './config/database.config';
 let PGliteDriver: any;
 if (usePGlite) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires -- must load lazily and synchronously, only when DATABASE_TYPE=pglite
     PGliteDriver = require('typeorm-pglite').PGliteDriver;
   } catch (e) {
     throw new Error(
