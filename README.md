@@ -1,20 +1,22 @@
-# APSO Service Template
+# Apso TypeScript Service Template
 
-A production-ready NestJS service template used by the APSO CLI to scaffold new microservices. This template provides a solid foundation for building scalable, maintainable, and well-structured microservices following Domain-Driven Design principles.
+The GitHub template behind every Apso TypeScript backend: NestJS, TypeORM, and PostgreSQL. `apso init --name my-api --language typescript` clones this repository, and `apso generate` turns your `.apsorc` schema into entities, controllers, services, and migrations inside it. The generated code is yours: Apache-2.0 licensed, no Apso SDK, no runtime dependency.
+
+New to Apso? The [quickstart](https://docs.apso.ai/get-started/quickstart) goes from schema to running API in about ten minutes. All three language templates are listed at [apso.ai/templates](https://apso.ai/templates).
 
 ## Features
 
-- 🚀 NestJS-based microservice architecture
-- 🔄 Dual API support (REST & GraphQL)
-- 📦 TypeORM integration with PostgreSQL
-- 🔐 Built-in authentication and authorization
-- 🎯 Health check endpoints
-- 🧪 Comprehensive testing setup
-- 📊 OpenAPI/Swagger documentation
-- 🐳 Docker and docker-compose support
-- ☁️ AWS Lambda deployment ready
-- 🌱 Database seeding support
-- 🔄 Automatic migration management
+- NestJS-based service architecture
+- Dual API support (REST and GraphQL)
+- TypeORM integration with PostgreSQL
+- Built-in authentication and authorization
+- Health check endpoints
+- Comprehensive testing setup
+- OpenAPI/Swagger documentation
+- Docker and docker-compose support
+- AWS Lambda deployment ready
+- Database seeding support
+- Automatic migration management
 
 ## Getting Started
 
@@ -31,7 +33,7 @@ A production-ready NestJS service template used by the APSO CLI to scaffold new 
 
 ```bash
 # Clone the repository
-git clone https://github.com/[YOUR_ORG_OR_USERNAME]/apso-service-template
+git clone https://github.com/apsoai/service-template-ts.git
 
 # Install dependencies
 npm install
@@ -154,7 +156,7 @@ This template follows Domain-Driven Design principles and SOLID patterns:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
 
 ## Support
 
