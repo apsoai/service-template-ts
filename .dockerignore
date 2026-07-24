@@ -1,0 +1,14 @@
+# Keep secrets and local cruft out of the Docker build context. The deploy
+# Dockerfile does `COPY . .`, so without this a local .env with real secrets
+# would be baked into the image.
+.env
+.env.*
+!.env.example
+
+node_modules
+dist
+coverage
+.git
+.github
+*.log
+.DS_Store
