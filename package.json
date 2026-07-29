@@ -67,7 +67,7 @@
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.31",
-    "typeorm-extension": "^3.5.1",
+    "typeorm-extension": "^3.9.0",
     "@electric-sql/pglite": "^0.5.2",
     "typeorm-pglite": "^0.3.2"
   },
