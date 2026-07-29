@@ -14,6 +14,9 @@ import { usePGlite, useNoDatabase } from './config/database.config';
 let PGliteDriver: any;
 if (usePGlite) {
   try {
+    // Deliberate conditional require: the driver must only load when
+    // DATABASE_TYPE=pglite (a static import would break non-pglite installs).
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     PGliteDriver = require('typeorm-pglite').PGliteDriver;
   } catch (e) {
     throw new Error(
