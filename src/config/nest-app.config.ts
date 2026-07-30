@@ -1,21 +1,14 @@
 import { INestApplication } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { TypeORMErrorFilter } from '../utils/errors/db-exception.filter';
-import * as fs from 'fs';
-import * as path from 'path';
+import { getServiceName } from '../utils/service-metadata';
 
 export async function configureNestApp(app: INestApplication): Promise<void> {
   // Configure global filters
   app.useGlobalFilters(new TypeORMErrorFilter());
 
-  // Read service name from .apsorc
-  let serviceName = '{Apso Service}';
-  try {
-    const apsoConfig = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), '.apsorc'), 'utf8'));
-    serviceName = apsoConfig.serviceName || serviceName;
-  } catch (error) {
-    console.warn('Could not read serviceName from .apsorc, using default value');
-  }
+  // Service name for the docs title (shared resolver: .apsorc → APP_NAME → pkg).
+  const serviceName = getServiceName('{Apso Service}');
 
   // Configure Swagger
   const options = new DocumentBuilder()
