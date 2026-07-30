@@ -20,18 +20,7 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
-
-// Read package metadata for sensible resource-attribute defaults.
-// Kept lazy and defensive so a missing package.json never breaks startup.
-function readPackageMeta(): { name?: string; version?: string } {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const pkg = require('../package.json');
-    return { name: pkg?.name, version: pkg?.version };
-  } catch {
-    return {};
-  }
-}
+import { getPackageMeta, getServiceName } from './utils/service-metadata';
 
 /**
  * Tracing is enabled when OTEL_ENABLED is truthy, OR when an OTLP endpoint is
@@ -54,12 +43,10 @@ export function startTracing(): void {
     return;
   }
 
-  const pkg = readPackageMeta();
-  const serviceName =
-    process.env.OTEL_SERVICE_NAME ||
-    process.env.APP_NAME ||
-    pkg.name ||
-    'apso-service';
+  const pkg = getPackageMeta();
+  // OTEL_SERVICE_NAME is the OTel-specific override; otherwise fall back to the
+  // shared resolver (.apsorc serviceName → APP_NAME → package name).
+  const serviceName = (process.env.OTEL_SERVICE_NAME || '').trim() || getServiceName('apso-service');
 
   const resource = new Resource({
     [ATTR_SERVICE_NAME]: serviceName,
