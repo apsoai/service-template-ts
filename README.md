@@ -17,6 +17,7 @@ New to Apso? The [quickstart](https://docs.apso.ai/get-started/quickstart) goes 
 - AWS Lambda deployment ready
 - Database seeding support
 - Automatic migration management
+- Built-in OpenTelemetry auto-instrumentation (per-request traces, off by default)
 
 ## Getting Started
 
@@ -123,6 +124,7 @@ src/
 ├── autogen/         # Auto-generated code (if any)
 ├── app.module.rest.ts    # REST API module configuration
 ├── app.module.graphql.ts # GraphQL API module configuration
+├── tracing.ts       # OpenTelemetry bootstrap (imported first in main.ts / lambda.ts)
 ├── main.ts          # Application entry point
 └── lambda.ts        # AWS Lambda handler
 ```
@@ -131,6 +133,42 @@ src/
 
 - REST API documentation is available at `/api` when running in development mode
 - GraphQL playground is available at `/graphql` when running in development mode
+
+## Observability (OpenTelemetry)
+
+Every service built from this template ships with OpenTelemetry auto-instrumentation wired in. When enabled, each incoming HTTP request becomes a trace/span with route, method, status, latency, DB queries, and errors, exported over OTLP HTTP to a collector you point it at (an OpenTelemetry Collector feeding a Grafana/Tempo stack, or Grafana Cloud's managed OTLP endpoint).
+
+The export destination is never hardwired to an Apso endpoint. You own where telemetry goes.
+
+### Off by default
+
+Tracing is a no-op unless you turn it on. With no OTLP endpoint and no enable flag set, the instrumentation does not start, does not export anything, and cannot block startup on an unreachable collector. Local dev and CI run exactly as before.
+
+### Enabling it
+
+Set the OTLP endpoint (and optionally a service name):
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export OTEL_SERVICE_NAME=my-api
+npm run start:prod
+```
+
+You should see `[otel] tracing enabled (...)` on startup, and traces begin flowing to your collector.
+
+### Environment variables
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP HTTP endpoint (OpenTelemetry Collector or Grafana Cloud). Setting this enables tracing. | unset (tracing off) |
+| `OTEL_SERVICE_NAME` | `service.name` reported on every trace. | falls back to `APP_NAME`, then the package name |
+| `OTEL_ENABLED` | Force-enable (`true`/`1`/`yes`) or force-disable (`false`/`0`/`no`), overriding endpoint detection. | unset |
+
+Standard `OTEL_*` environment variables (headers, resource attributes, sampling) are honored by the OpenTelemetry SDK as well.
+
+### How it is wired
+
+`src/tracing.ts` builds a `NodeSDK` with `getNodeAutoInstrumentations()` (HTTP, NestJS, `pg`, TypeORM, and more) and an OTLP HTTP trace exporter. It is imported as the very first line of `src/main.ts` and `src/lambda.ts` so instrumentation loads before the libraries it patches. The SDK is flushed on `SIGTERM`/`SIGINT` so in-flight spans are exported before the process exits.
 
 ## Contributing
 

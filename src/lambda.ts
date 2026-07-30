@@ -1,3 +1,6 @@
+// Must be the very first import: OpenTelemetry has to patch http/pg/typeorm
+// before Nest and those libraries load. Safe no-op when OTel is disabled.
+import './tracing';
 import { configure as serverlessExpress } from '@vendia/serverless-express';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.rest';
