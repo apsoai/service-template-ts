@@ -50,7 +50,7 @@ const ormConfig = useNoDatabase
       // like schema:sync followed by migration:generate). Without it, PGlite is in-memory
       // and data is lost when the process exits.
       ...(usePGlite && PGliteDriver
-        ? { driver: new PGliteDriver(process.env.PGLITE_DATA_DIR || undefined).driver }
+        ? { driver: new PGliteDriver({ dataDir: process.env.PGLITE_DATA_DIR }).driver }
         : {
             host: AppConfig.database?.host,
             port: parseInt(AppConfig.database?.port || '5432', 10),
