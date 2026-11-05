@@ -126,7 +126,8 @@ src/
 ├── app.module.graphql.ts # GraphQL API module configuration
 ├── tracing.ts       # OpenTelemetry bootstrap (imported first in main.ts / lambda.ts)
 ├── main.ts          # Application entry point
-└── lambda.ts        # AWS Lambda handler
+├── lambda.ts        # AWS Lambda handler (exports bootstrap())
+└── lambda-entry.mjs # ESM entry: boots Nest at Lambda init via top-level await
 ```
 
 ## API Documentation
