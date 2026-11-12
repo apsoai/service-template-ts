@@ -111,6 +111,33 @@ npm run log
 npm run shutdown
 ```
 
+## Querying the API
+
+List routes take the [PostgREST query syntax](https://docs.postgrest.org/en/v16/references/api/tables_views.html) and no other.
+
+```bash
+# Filter, choose columns, embed a related row, sort and page
+curl -H "x-api-key: $APSO_API_KEY" \
+  "http://localhost:3000/Projects?status=eq.open&select=id,title,organization(name)&order=id.desc&limit=20&offset=40"
+
+# Any of several conditions
+curl -H "x-api-key: $APSO_API_KEY" "http://localhost:3000/Projects?or=(status.eq.open,title.ilike.*urgent*)"
+
+# Ask for the total
+curl -i -H "x-api-key: $APSO_API_KEY" -H "Prefer: count=exact" "http://localhost:3000/Projects?limit=20"
+# HTTP/1.1 206 Partial Content
+# Content-Range: 0-19/42
+```
+
+- A filter is `column=operator.value`. Operators: `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `like` and `ilike` (`*` is the wildcard), `in.(a,b)`, `is.null`, `is.not_null`, `is.true`, `is.false`. Put `not.` in front to negate.
+- A list is a JSON array. The `Content-Range` response header gives the rows returned, and the total when the request sends `Prefer: count=exact`.
+- With no `limit` a list returns 5 rows. When more exist the status is 206 and `Content-Range` has the total. The largest `limit` is 100.
+- A filter on a related row needs the relation in `select`: `select=id,tasks!inner(title)&tasks.title=eq.Ship`.
+- The older nestjsx parameters (`filter`, `join`, `sort`, `s`, `fields`, `page`, `per_page`, `cache`) get a 400 that names the PostgREST equivalent.
+- MCP list tools take the same arguments.
+
+The `/_docs` page lists the parameters of every route. What is supported and what is refused is listed in `docs/DIALECTS.md` of the `@apso/crud` package.
+
 ## Project Structure
 
 ```
