@@ -75,6 +75,9 @@ controller while keeping the entity, service, DTOs, and module.
   `"table"` value on the entity.
 - `enum` fields require a `values` array.
 - Index every `ManyToOne` you intend to filter by: `"index": true` on the relationship.
+- List routes take PostgREST query syntax only: `?status=eq.open&select=id,title,tasks(title)&order=id.desc&limit=20`.
+  `filter=`, `join=`, `sort=`, `s=` and `page=` get a 400. A list is a JSON array, and the total is in the
+  `Content-Range` header when the request sends `Prefer: count=exact`.
 
 ## MCP
 
