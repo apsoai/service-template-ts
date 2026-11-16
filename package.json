@@ -41,7 +41,7 @@
     "@apso/crud": "^1.1.0",
     "@apso/crud-core": "^1.1.0",
     "@apso/crud-request": "^1.0.2",
-    "@apso/crud-typeorm": "^1.1.0",
+    "@apso/crud-typeorm": "^1.1.1",
     "@apso/logging": "^0.1.0",
     "@apso/mcp": "^0.2.0",
     "@apso/postgrest-request": "^1.1.0",
