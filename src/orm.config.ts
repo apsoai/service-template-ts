@@ -50,7 +50,15 @@ const ormConfig = useNoDatabase
       // like schema:sync followed by migration:generate). Without it, PGlite is in-memory
       // and data is lost when the process exits.
       ...(usePGlite && PGliteDriver
-        ? { driver: new PGliteDriver({ dataDir: process.env.PGLITE_DATA_DIR }).driver }
+        ? {
+            driver: new PGliteDriver({
+              dataDir: process.env.PGLITE_DATA_DIR,
+              // TypeORM installs uuid-ossp for any entity with a generated uuid
+              // column, and a uuid primary key defaults to uuid_generate_v4().
+              // eslint-disable-next-line @typescript-eslint/no-var-requires
+              extensions: { uuid_ossp: require('@electric-sql/pglite/contrib/uuid_ossp').uuid_ossp },
+            }).driver,
+          }
         : {
             host: AppConfig.database?.host,
             port: parseInt(AppConfig.database?.port || '5432', 10),
@@ -62,6 +70,10 @@ const ormConfig = useNoDatabase
           }),
       entities: [join(__dirname, '**', '*.entity.js')],
       migrations: [join(__dirname, '**', 'migrations/*-migration.js')],
+      // On connect TypeORM runs CREATE EXTENSION for what the entities use
+      // (uuid-ossp for generated uuid columns). Set DATABASE_INSTALL_EXTENSIONS=false
+      // for a database this service must not add anything to.
+      installExtensions: process.env.DATABASE_INSTALL_EXTENSIONS !== 'false',
       synchronize: AppConfig.database?.synchronize ?? false,
       logging: AppConfig.database?.logging ?? false,
     };
