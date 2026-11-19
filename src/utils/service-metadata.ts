@@ -50,6 +50,7 @@ export function getApsorc(): Record<string, unknown> {
 
 /**
  * Canonical service name: `.apsorc` serviceName → `APP_NAME` env → package name
+ * (unless it is still the template's)
  * → the provided fallback. Callers that have their own higher-priority override
  * (e.g. OTEL_SERVICE_NAME) should apply it before falling back to this.
  */
@@ -57,5 +58,8 @@ export function getServiceName(fallback = 'apso-service'): string {
   const apsorc = getApsorc();
   const fromApsorc = typeof apsorc.serviceName === 'string' ? apsorc.serviceName.trim() : '';
   const fromEnv = (process.env.APP_NAME || '').trim();
-  return fromApsorc || fromEnv || getPackageMeta().name || fallback;
+  // The template's own package name says nothing about this service.
+  const pkgName = getPackageMeta().name || '';
+  const fromPkg = pkgName.startsWith('@apso/service-template') ? '' : pkgName;
+  return fromApsorc || fromEnv || fromPkg || fallback;
 }
