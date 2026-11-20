@@ -3,6 +3,7 @@ import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
 import { mountMcp } from '@apso/mcp';
 import { TypeORMErrorFilter } from '../utils/errors/db-exception.filter';
 import { getApsorc, getServiceName } from '../utils/service-metadata';
+import * as autogen from '../autogen';
 
 export async function configureNestApp(app: INestApplication): Promise<void> {
   // Configure global filters
@@ -28,12 +29,19 @@ export function buildDocumentConfig(): Omit<OpenAPIObject, 'paths'> {
   const builder = new DocumentBuilder()
     .setTitle(getServiceName('API'))
     .setVersion('1.0');
+  // The CLI (0.52+) generates the access rules from .apsorc into src/autogen:
+  // sign-in provider, tenant scoping and the roles each operation needs.
+  const generated = (autogen as unknown as { apiDescription?: unknown }).apiDescription;
+  if (typeof generated === 'string' && generated) {
+    builder.setDescription(generated);
+  } else if (signIn) {
+    builder.setDescription(
+      "Send the signed-in user's token from the sign-in provider as `Authorization: Bearer <token>`. " +
+        'The server reads the tenant and roles from the token and fills in the tenant field on every write.',
+    );
+  }
   if (signIn) {
     builder
-      .setDescription(
-        "Send the signed-in user's token from the sign-in provider as `Authorization: Bearer <token>`. " +
-          'The server reads the tenant and roles from the token and fills in the tenant field on every write.',
-      )
       .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'bearer')
       .addSecurityRequirements('bearer');
   }
