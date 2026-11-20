@@ -16,7 +16,8 @@ import AppConfig from './config';
     logging: AppConfig.database.logging,
     entities: [join(__dirname, '**','*.entity.ts')],
   };
-  console.log(db);
+  // The password stays out of the log.
+  console.log({ ...db, password: db.password ? '***' : undefined });
   const PostgresDataSource = new DataSource(db);
   try {
     await PostgresDataSource.initialize();
@@ -26,5 +27,9 @@ import AppConfig from './config';
   } catch (err) {
     console.error('Error during Data Source synchronization');
     console.error(err);
+    // A failed sync must fail the command, so CI and scripts see it.
+    process.exitCode = 1;
+  } finally {
+    if (PostgresDataSource.isInitialized) await PostgresDataSource.destroy();
   }
 })();
