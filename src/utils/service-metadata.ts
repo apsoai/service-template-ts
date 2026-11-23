@@ -49,7 +49,7 @@ export function getApsorc(): Record<string, unknown> {
 }
 
 /**
- * Apso ids attached to every trace. Deploy env (APSO_SERVICE_ID / SERVICE_ID,
+ * Apso ids attached to every trace. Deploy env (SERVICE_ID,
  * APSO_WORKSPACE_ID, APSO_ENVIRONMENT / ENV) wins over the ids the CLI wrote into
  * `.apsorc`, so a hosted deploy is authoritative and a forked repo that still
  * carries the original's ids is overridden.
@@ -64,7 +64,7 @@ export function getIdentityAttributes(): Record<string, string> {
     return '';
   };
   const attrs: Record<string, string> = {
-    'apso.service.id': first(process.env.APSO_SERVICE_ID, process.env.SERVICE_ID, apsorc.serviceId),
+    'apso.service.id': first(process.env.SERVICE_ID, apsorc.serviceId),
     'apso.workspace.id': first(process.env.APSO_WORKSPACE_ID, apsorc.workspaceId),
     'deployment.environment': first(process.env.APSO_ENVIRONMENT, process.env.ENV),
   };

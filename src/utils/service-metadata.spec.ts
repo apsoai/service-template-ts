@@ -14,7 +14,7 @@ describe('service identity', () => {
       JSON.stringify({ serviceName: 'from-file', serviceId: '1', workspaceId: '9' }),
     );
     process.chdir(dir);
-    for (const v of ['APP_NAME', 'APSO_SERVICE_ID', 'SERVICE_ID', 'APSO_WORKSPACE_ID', 'APSO_ENVIRONMENT', 'ENV']) {
+    for (const v of ['APP_NAME', 'SERVICE_ID', 'APSO_WORKSPACE_ID', 'APSO_ENVIRONMENT', 'ENV']) {
       delete process.env[v];
     }
   });
@@ -30,7 +30,8 @@ describe('service identity', () => {
   });
 
   it('lets deploy env override the file', () => {
-    process.env.APSO_SERVICE_ID = '42';
+    process.env.APSO_SERVICE_ID = 'stack-id'; // access-token audience, not the id
+    process.env.SERVICE_ID = '42';
     process.env.APSO_ENVIRONMENT = 'production';
     expect(getIdentityAttributes()).toEqual({
       'apso.service.id': '42',
