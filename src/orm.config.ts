@@ -72,7 +72,12 @@ export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions | null = useNoDatabas
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (): Promise<TypeOrmModuleOptions> => {
-        console.log('ORM CONFIG', { ...ormConfig, driver: usePGlite ? '[PGliteDriver]' : undefined });
+        // Never log the password: these logs go to CloudWatch and the Apso dashboard.
+        console.log('ORM CONFIG', {
+          ...ormConfig,
+          ...('password' in ormConfig! ? { password: '[redacted]' } : {}),
+          driver: usePGlite ? '[PGliteDriver]' : undefined,
+        });
         if (usePGlite) {
           console.log('Using PGlite in-memory database');
         }
