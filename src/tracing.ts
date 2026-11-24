@@ -20,13 +20,16 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
-import { getPackageMeta, getServiceName } from './utils/service-metadata';
+import { getIdentityAttributes, getPackageMeta, getServiceName } from './utils/service-metadata';
 
 /**
  * Tracing is enabled when OTEL_ENABLED is truthy, OR when an OTLP endpoint is
  * configured. Setting OTEL_ENABLED=false explicitly disables it regardless of endpoint.
  */
-function isTracingEnabled(): boolean {
+export function isTracingEnabled(): boolean {
+  // APSO_TELEMETRY=off always wins, even on Apso-hosted deploys.
+  const kill = (process.env.APSO_TELEMETRY || '').trim().toLowerCase();
+  if (kill === 'off' || kill === 'false' || kill === '0' || kill === 'no') return false;
   const flag = (process.env.OTEL_ENABLED || '').trim().toLowerCase();
   if (flag === 'false' || flag === '0' || flag === 'no') return false;
   if (flag === 'true' || flag === '1' || flag === 'yes') return true;
@@ -50,6 +53,7 @@ export function startTracing(): void {
 
   const resource = new Resource({
     [ATTR_SERVICE_NAME]: serviceName,
+    ...getIdentityAttributes(),
     ...(pkg.version ? { [ATTR_SERVICE_VERSION]: pkg.version } : {}),
   });
 
